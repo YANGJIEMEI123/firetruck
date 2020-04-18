@@ -96,7 +96,7 @@ app.post("/login", function (req, res) {
     var sql = "select * from fireman where account='" + req.body.account + "'";
     mydb.query(sql, function (err, results) {
         // console.log(results);
-        console.log(results[0].passwd)
+        // console.log(results[0].passwd)
         console.log(req.body.password)
         console.log(results.passwd ==req.body.password )
         if(results.length<=0){
@@ -174,7 +174,7 @@ app.use('/getSVG',require('./Controller/getSVG'))
 //批量导入数据到数据库
 app.post('/updatecarinfor',function(req,res){
     console.log('yes');
-    console.log(req.body.upsrc);
+    // console.log(req.body.upsrc);
     const realsrc=req.body.upsrc;
     var list = XLSX.parse('.'+realsrc.slice(realsrc.indexOf("/",7)));
     // var len=list[0].data.length;
@@ -183,7 +183,7 @@ app.post('/updatecarinfor',function(req,res){
         return index !== 0;
     })
 
-    console.log(newArr);
+    // console.log(newArr);
     var values=newArr;
 
      //如果数据库中数据已存在,就删除原来的数据替换它,如果不存在则等同于insert into
