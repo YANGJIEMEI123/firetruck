@@ -1,10 +1,15 @@
-import React,{useState} from 'react';
+import React from 'react';
 import {Link} from 'react-router';
 import axios from 'axios';
+// import { routerRedux } from 'dva/router';
+// import { hashHistory } from 'react-router';
+import './Log.css';
 // import { Form, Input, Button, Checkbox } from 'antd';
-import {Form,Input,Button,Checkbox, message,Row,Col} from 'antd';
+import {Form,Input,Button, message,Row,Col} from 'antd';
 import 'antd/dist/antd.css';
 // import { UserOutlined, LockOutlined } from '@ant-design/icons';
+
+
 
 const layout = {
   labelCol: {
@@ -21,7 +26,11 @@ const tailLayout = {
   },
 };
 
+
+
 const Log = () => {
+
+//  const [svgUrl,setSvgUrl]=useState()
   const onFinish = values => {
     console.log('Success:', values);
   };
@@ -41,17 +50,19 @@ const Log = () => {
   const warning = (ms) => {
     message.warning(ms);
   };
-  const [nextRoute,setNextRoute]=useState('/');
+  // const [nextRoute,setNextRoute]=useState('/');
 
-  const changeRoute=()=>{
-    setNextRoute('/Index')
-  }
-//   const [svgsrc,setSvgsrc]=useState('点击获取验证码')
-// const changeSrc=(src)=>{
-// setSvgsrc(src);
-// }
+  // const changeRoute=()=>{
+  //   setNextRoute('/Index')
+  // }
+
+
+
+  
+
+
   return (
-    <div  style={{maxWidth:'400px',height:'400px',margin:'auto',position:'absolute',top:'0',right:'0',bottom:'0',left:'0'}}>
+    <div  style={{maxWidth:'500px',height:'400px',margin:'auto',position:'absolute',top:'0',right:'0',bottom:'0',left:'0'}}>
     <Form
       {...layout}
       name="basic"
@@ -65,13 +76,18 @@ const Log = () => {
         label="账户"
         name="username"
         rules={[
+        
           {
             required: true,
-            message: 'Please input your username!',
+            message: '账号不能为空',
+          },{
+            type:'email' ,
+            message:'邮箱格式错误'      
           },
+        
         ]}
       >
-        <Input />
+        <Input placeholder="请输入注册邮箱" size="large"/>
       </Form.Item>
 
       <Form.Item
@@ -80,14 +96,16 @@ const Log = () => {
         rules={[
           {
             required: true,
-            message: 'Please input your password!',
+            message: '密码不能为空',
           },
+          { pattern:new RegExp('^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,16}$'),message:'密码为8-16位数字和字母的组合'}
+        
         ]}
       >
-        <Input.Password />
+        <Input.Password    size="large" />
       </Form.Item>
 
-      <Form.Item label="验证码"   extra="We must make sure that your are a human.">
+      <Form.Item label="验证码"  >
         <Row gutter={8}>
           <Col span={12}>
             <Form.Item
@@ -97,40 +115,54 @@ const Log = () => {
               rules={[
                 {
                   required: true,
-                  message: 'Please input the captcha you got!',
+                  // message: 'Please input the captcha you got!',
                 },
              
               ]}
             >
-              <Input />
+              <Input  size="large"/>
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Button   
-            style={{backgroundColor:'#66775530'}}
+            <Button  style={{width:'100%'}}
+            size="large"
+            id="bt"
+            style={{overflow:"hidden"}}
+            // onClick={(e)=>{getYzm(e)}} 
+            // style={:'#66775530'}}
             // style={{background:'url('+{svgsrc}+')'}}
+            // ={{_html: svgUrl}} 
+            // dangerouslySetInnerHTML={svgUrl}
+   
+            className="bt"
               onClick={()=>{
               axios.post('http://localhost:8081/getSVG',{}).then(function(response){
-              console.log(response)
-              // changeSrc(response.data.img);
+              console.log(typeof response.data)
+              // var ss=document.getElementById('bt').innerHTML
+              document.getElementById('bt').innerHTML=response.data;
+         
               }).catch(function(err){
                 console.log(err);
               })
             }
-            }>
-              <svg style={{width:'100%',height:'100%'}} xmlns="http://www.w3.org/2000/svg" alt='点击切换验证码'></svg></Button>
+
+            }
+          >
+            <svg  id="svg" style={{position:"relative",top:-7}} xmlns="http://www.w3.org/2000/svg" width="150" height="44" viewBox="0,0,150,44"><path d="M4 41 C72 9,90 30,142 22" stroke="#7171ee" fill="none"/><path d="M2 19 C75 32,56 33,147 13" stroke="#e2be54" fill="none"/><path fill="#e16fa8" d="M108.71 38.02L108.75 38.07L108.73 38.04Q111.88 33.77 118.58 25.85L118.70 25.98L118.61 25.88Q112.69 26.09 108.92 24.72L108.96 24.76L108.99 24.79Q108.22 23.26 107.46 21.85L107.54 21.94L107.62 22.01Q111.61 23.42 116.07 23.46L116.04 23.43L116.08 23.47Q120.50 23.47 124.68 22.40L124.70 22.41L124.74 22.46Q124.30 23.09 124.04 23.62L124.02 23.60L123.98 23.56Q121.62 25.96 118.80 29.58L118.65 29.42L113.77 35.66L113.76 35.65Q115.96 35.42 118.21 35.49L118.39 35.67L118.21 35.50Q120.48 35.63 122.72 36.01L122.72 36.01L122.72 36.01Q122.86 36.60 123.58 38.62L123.54 38.58L123.68 38.72Q119.83 37.76 115.83 37.88L115.96 38.00L115.94 37.99Q111.93 38.05 108.27 39.23L108.20 39.15L108.32 39.27Q108.43 39.15 108.89 38.20ZM107.74 39.87L107.74 39.87L107.59 39.72Q108.52 39.55 110.12 39.13L110.08 39.09L110.04 39.06Q109.72 39.19 109.30 39.61L109.49 39.79L109.49 39.79Q109.25 40.36 108.64 41.50L108.52 41.38L108.59 41.45Q113.24 40.05 118.23 40.20L118.25 40.21L118.35 40.32Q123.23 40.40 127.80 42.26L127.80 42.27L127.73 42.20Q126.26 40.31 125.35 38.25L125.36 38.27L125.35 38.26Q124.61 37.97 123.54 37.74L123.65 37.85L123.60 37.81Q123.43 37.10 123.05 35.65L123.07 35.68L123.05 35.66Q121.44 35.26 117.86 35.15L117.90 35.18L117.95 35.23Q120.22 31.79 125.24 25.44L125.29 25.49L125.38 25.57Q125.54 24.74 126.22 23.41L126.34 23.53L124.07 24.30L123.99 24.22Q124.04 24.12 124.19 24.00L124.19 24.00L124.38 23.81L124.48 23.91Q124.93 22.84 125.50 21.89L125.45 21.84L125.42 21.81Q120.78 23.18 116.06 23.11L116.08 23.13L116.08 23.13Q111.17 22.93 106.68 21.11L106.87 21.30L106.72 21.15Q108.00 23.12 108.80 25.17L108.80 25.17L108.82 25.19Q109.60 25.44 110.66 25.70L110.67 25.71L110.67 25.71Q110.88 26.41 111.18 27.86L111.25 27.92L111.08 27.76Q112.72 28.07 116.03 28.22L116.02 28.20L116.02 28.20Q113.58 31.48 108.40 37.91L108.56 38.07L108.44 37.94Q108.23 38.58 107.66 39.80Z"/><path fill="#7ee45c" d="M48.20 11.32L48.10 11.23L48.18 11.30Q51.93 13.80 56.69 14.03L56.81 14.14L56.73 14.07Q61.29 14.17 65.55 12.42L65.57 12.44L65.68 12.55Q65.41 13.07 64.64 15.85L64.56 15.77L64.70 15.91Q61.92 16.89 58.95 17.04L58.86 16.96L58.95 17.05Q55.92 17.14 53.03 16.42L52.99 16.38L53.01 16.40Q53.76 20.08 53.95 23.74L53.86 23.64L53.86 23.64Q56.01 24.00 57.60 23.96L57.64 24.00L57.45 23.81Q58.81 23.96 61.21 23.84L61.19 23.82L61.13 23.75Q61.14 24.46 61.14 25.14L61.20 25.20L61.07 26.40L61.18 26.51Q58.74 26.47 53.95 26.55L53.88 26.49L53.94 26.54Q53.86 30.57 53.29 34.57L53.44 34.72L53.37 34.66Q55.94 33.95 58.68 34.07L58.80 34.19L58.79 34.17Q61.46 34.22 64.05 35.05L63.94 34.94L64.03 35.03Q64.05 35.78 64.32 36.54L64.33 36.55L64.73 38.01L64.80 38.08Q61.69 36.88 58.26 36.88L58.29 36.91L58.13 36.75Q53.38 36.87 49.12 39.12L49.07 39.07L48.96 38.96Q51.36 32.23 51.10 25.11L51.16 25.18L51.11 25.12Q50.75 17.87 48.09 11.21ZM48.51 39.73L48.59 39.81L48.49 39.71Q49.77 39.01 50.53 38.67L50.52 38.65L50.56 38.70Q50.34 39.42 49.76 40.94L49.89 41.08L49.86 41.04Q54.41 39.08 59.47 39.34L59.35 39.22L59.41 39.29Q64.62 39.62 68.61 42.32L68.68 42.39L68.56 42.27Q67.39 39.72 66.70 37.78L66.71 37.79L66.82 37.90Q65.82 37.28 64.83 36.94L64.77 36.88L64.73 36.83Q64.30 35.42 64.15 34.62L64.19 34.66L64.27 34.74Q61.21 33.78 58.05 33.78L57.87 33.59L58.03 33.76Q56.75 33.62 55.61 33.73L55.71 33.83L55.76 33.88Q55.87 32.62 55.91 31.41L55.81 31.30L55.94 28.85L55.84 28.75Q57.79 28.79 59.58 28.83L59.53 28.78L59.52 28.77Q61.26 28.73 63.05 28.88L63.21 29.04L63.06 28.88Q63.16 28.11 63.16 27.16L63.16 27.16L63.10 25.20L62.26 25.23L62.29 25.26Q61.78 25.24 61.32 25.24L61.48 25.41L61.29 25.22Q61.35 24.59 61.50 23.29L61.57 23.36L61.52 23.31Q59.96 23.58 58.78 23.61L58.84 23.68L58.71 23.54Q57.82 23.61 56.00 23.54L56.06 23.60L55.89 23.43Q55.99 22.19 55.80 19.38L55.74 19.32L55.77 19.35Q56.71 19.38 57.70 19.38L57.82 19.50L57.65 19.32Q62.51 19.47 66.21 17.57L66.24 17.60L66.07 17.43Q66.66 15.09 67.54 12.88L67.61 12.95L67.57 12.92Q66.27 13.79 65.44 14.13L65.34 14.04L65.46 14.16Q65.82 13.45 66.28 11.89L66.22 11.84L66.23 11.84Q61.62 14.01 56.75 13.70L56.57 13.53L56.67 13.63Q51.31 13.25 47.46 10.40L47.52 10.46L47.62 10.56Q50.45 17.46 50.76 25.07L50.75 25.06L50.65 24.97Q51.00 32.93 48.48 39.70Z"/><path fill="#48b2d5" d="M78.93 11.35L78.93 11.35L78.96 11.38Q81.44 13.02 83.19 13.44L83.17 13.42L83.26 13.51Q84.49 19.92 84.49 26.51L84.46 26.47L84.52 26.53Q84.53 30.54 83.99 34.53L84.02 34.56L83.90 34.44Q86.20 34.04 88.67 34.11L88.58 34.01L88.64 34.08Q91.11 34.15 93.24 34.87L93.37 35.00L93.30 34.93Q93.67 36.52 94.13 38.08L93.98 37.93L93.99 37.95Q90.68 36.65 86.83 36.92L86.76 36.84L86.73 36.82Q82.97 37.17 79.74 39.07L79.66 39.00L79.74 39.07Q81.88 32.15 81.61 25.15L81.65 25.19L81.68 25.22Q81.30 18.02 78.86 11.28ZM79.23 39.82L79.25 39.84L79.21 39.80Q79.82 39.35 81.19 38.63L81.28 38.71L81.32 38.76Q81.10 39.44 80.57 40.93L80.62 40.98L80.49 40.86Q84.13 39.28 87.98 39.28L87.92 39.22L87.94 39.24Q93.56 39.23 97.67 42.27L97.73 42.33L97.59 42.19Q96.94 40.70 95.91 37.74L96.05 37.87L95.93 37.76Q95.00 37.25 94.13 36.87L94.07 36.81L94.11 36.85Q93.93 36.09 93.62 34.69L93.65 34.71L93.58 34.64Q91.01 33.78 88.00 33.78L87.96 33.74L87.91 33.70Q87.18 33.72 86.38 33.76L86.32 33.70L86.47 33.85Q86.66 28.87 86.59 24.75L86.62 24.79L86.58 24.75Q86.42 20.55 86.08 15.57L86.17 15.66L86.08 15.57Q84.69 15.47 83.89 15.28L83.97 15.36L83.87 15.26Q83.77 14.55 83.54 13.14L83.53 13.13L83.60 13.20Q80.57 12.46 78.33 10.52L78.29 10.48L78.19 10.38Q81.03 17.56 81.30 25.06L81.24 25.01L81.34 25.10Q81.57 32.61 79.18 39.77Z"/><path fill="#e15578" d="M28.25 37.17L28.29 37.22L28.36 37.28Q26.35 37.07 24.68 37.64L24.73 37.69L24.72 37.67Q25.20 34.01 25.31 30.89L25.40 30.98L25.43 31.00Q25.49 27.90 25.26 24.24L25.34 24.32L25.22 24.21Q23.93 23.94 23.17 23.56L23.11 23.51L22.65 20.42L22.73 20.50Q23.39 21.04 24.99 21.61L25.03 21.66L25.12 21.74Q24.85 19.57 24.43 16.83L24.51 16.91L24.35 16.75Q26.77 17.57 28.41 17.42L28.43 17.45L28.24 21.98L28.24 21.97Q29.55 21.79 30.88 21.30L30.97 21.39L31.01 21.43Q30.99 22.36 30.76 24.11L30.72 24.07L30.62 23.97Q29.12 24.34 28.09 24.34L28.19 24.43L28.24 24.49Q28.13 26.54 28.13 30.80L28.09 30.77L28.10 30.78Q28.28 35.11 28.36 37.28ZM31.46 20.89L31.43 20.86L31.29 20.72Q31.22 21.03 30.61 21.26L30.60 21.25L30.80 18.29L30.87 18.36Q30.18 18.77 28.77 19.00L28.72 18.95L28.66 18.89Q28.75 18.29 28.90 16.92L28.89 16.91L28.88 16.90Q28.25 16.95 27.68 16.95L27.67 16.95L27.57 16.85Q25.62 17.03 23.99 16.31L23.95 16.27L23.88 16.20Q24.29 18.60 24.56 21.07L24.61 21.12L24.65 21.16Q23.81 20.86 22.29 19.83L22.24 19.78L22.25 19.79Q22.61 21.10 22.84 23.80L22.88 23.84L22.73 23.70Q23.36 24.10 24.54 24.52L24.55 24.53L24.39 24.37Q24.58 25.16 24.62 26.57L24.61 26.56L24.96 26.58L25.10 26.64L25.02 26.55Q25.00 27.71 25.00 28.89L25.08 28.98L24.98 28.87Q25.16 34.01 24.36 38.35L24.23 38.22L24.27 38.25Q24.49 38.17 26.43 37.64L26.49 37.70L26.35 37.56Q26.40 38.25 26.28 39.62L26.32 39.65L26.27 39.61Q27.21 39.67 28.01 39.67L27.92 39.59L28.01 39.68Q29.57 39.52 31.20 40.09L31.30 40.18L31.29 40.18Q29.93 34.43 30.12 26.51L30.07 26.47L32.58 26.20L32.51 26.12Q32.66 25.29 32.74 24.26L32.74 24.26L32.92 22.23L32.83 22.14Q32.22 22.38 31.04 22.84L31.02 22.81L31.07 22.86Q31.33 21.48 31.25 21.14L31.34 21.23L31.39 21.27Q31.39 21.09 31.47 20.90Z"/></svg>
+            {/* <svg  id="svg"   xmlns="http://www.w3.org/2000/svg" width="100%" height="22" viewBox="0,0,100,22"></svg> */}
+         </Button>
           </Col>
         </Row>
       </Form.Item>
 
-      <Form.Item {...tailLayout} name="remember" valuePropName="checked">
+      {/* <Form.Item {...tailLayout} name="remember" valuePropName="checked">
         <Checkbox>Remember me</Checkbox>
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item {...tailLayout}>
-        <Link to={nextRoute}>
-        <Button type="primary"  onClick={()=>{
-          axios.post('http://localhost:8081/login',{account:document.getElementById('basic_username').value,password:document.getElementById('basic_password').value}).then(function(response){
+      
+        <Button size="large" type="primary"  onClick={()=>{
+          axios.post('http://localhost:8081/login',{account:document.getElementById('basic_username').value,password:document.getElementById('basic_password').value,captcha:document.getElementById('basic_captcha').value}).then(function(response){
            console.log(response)
            if(response.data.msg==='account is not exist'){
             //  alert('')
@@ -138,10 +170,19 @@ const Log = () => {
            }
            if(response.data.msg==='login success'){
             success('登录成功!');
-            changeRoute();
+            // hashHistory.push('Index')
+            // this.dispatch(routerRedux.push({
+            //   pathname: "/Index"
+            // }));
+            sessionStorage.setItem("userName", "Smith");
+      
+            // changeRoute();
            }
-            if(response.data.msg==='password is wrong'){
+            if(response.data==='密码错误'){
            error('密码错误!')
+           }
+           if(response.data==="验证码错误"){
+             alert("验证码错误")
            }
           }).catch(function(err){
             console.log(err)
@@ -149,7 +190,7 @@ const Log = () => {
         }}>
           登录
         </Button>
-        </Link>or <Link to='/Regist'>立即注册</Link>
+        <Link to='/Regist'>立即注册</Link>
       </Form.Item>
     </Form>
     </div>

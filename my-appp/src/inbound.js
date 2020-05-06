@@ -67,17 +67,17 @@ class InforUpload extends React.Component {
     return(<div style={{display:"flex"}}>
     <Upload  {...this.state.props} style={{marginBottom:"10px;"}}>
       <Button >
-        <UploadOutlined /> 上传Excel
+        <UploadOutlined /> 入库上传
       </Button>
     </Upload>
-    <Button style={{marginRight:20,marginLeft:20}} type="primary" disabled={this.state.dis} htmlType="submit" onClick={this.onClick} >导入</Button>
-    <Button  type="primary"  id="exportExcel" onClick={()=>{
+    <Button style={{marginRight:20,marginLeft:20}} type="primary" disabled={this.state.dis} htmlType="submit" onClick={this.onClick} >确认入库</Button>
+    {/* <Button  type="primary"  id="exportExcel" onClick={()=>{
 
     console.info("exportExcel");
     var url =  "http://localhost:8081/exportExcel/" + 1;
     console.info(url);
     window.location = url;
-    }} >导出</Button>
+    }} >导出</Button> */}
      </div>
      )
     
@@ -88,7 +88,7 @@ class InforUpload extends React.Component {
 
 
 
-const CarState =()=> {
+const Inbound =()=> {
 
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState([]);
@@ -292,5 +292,5 @@ const handleReset = clearFilters => {
 }
 
 
-  export default CarState;
   
+export default Inbound;

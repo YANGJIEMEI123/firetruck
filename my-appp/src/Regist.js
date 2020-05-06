@@ -2,9 +2,10 @@ import React,{ useState, useEffect } from 'react';//c
 import {Link} from 'react-router';
 import axios from 'axios';
 import 'antd/dist/antd.css';
-import{Form,Input,Row,Col,Checkbox,Button} from 'antd';
+import{Form,Input,Row,Col,Button} from 'antd';
 
-
+// axios.defaults.withCredentials=true;
+// axios.defaults.baseURL="http://localhost:8081/"
 const formItemLayout = {
   labelCol: {
     xs: {
@@ -54,7 +55,7 @@ var changeDisStatus=()=>{
  setdisStatus(flag)
 }
   var setTime=()=>{
-    let countdown = 10;
+    let countdown = 60;
     // @ts-ignore
   
     const timer = setInterval(() => {
@@ -81,7 +82,7 @@ const onFinish = values => {
   console.log('Received values of form: ', values);
 };
   return (
-    <div style={{maxWidth:'500px',height:'600px',margin:'auto',position:'absolute',top:'0',right:'0',bottom:'0',left:'0'}}>
+    <div style={{maxWidth:'500px',height:'500px',margin:'auto',position:'absolute',top:'0',right:'0',bottom:'0',left:'0'}}>
     <Form
       {...formItemLayout}
       form={form}
@@ -99,6 +100,7 @@ const onFinish = values => {
         htmlFor="email"
         shouldUpdate='true'
         validateFirst='true'
+       
         rules={[
         
           {
@@ -112,18 +114,47 @@ const onFinish = values => {
         ]}
       >
        
-        <Input  
+        <Input   size="large"   autoComplete="off"
           // addonBefore={prefixSelector}
           style={{
             width: '100%',
           }}
-          placeholder='请输入手机号或者邮箱'
+         
+        />
+      </Form.Item>
+
+
+      <Form.Item
+        name="username"
+        label="用户名"
+        htmlFor="username"
+        shouldUpdate='true'
+        // validateFirst='true'
+        rules={[
+        
+          {
+            required: true,
+            message: '账号不能为空',
+          }
+        
+        ]}
+      >
+       
+        <Input   size="large"
+          // addonBefore={prefixSelector}
+          style={{
+            width: '100%',
+          }}
+          placeholder="请输入真实姓名"
+          autoComplete="off"
+         
         />
       </Form.Item>
 
       <Form.Item
         name="password"
         label="密码"
+        autoComplete="off"
         htmlFor='pw'
         validateFirst='true'
         rules={[
@@ -136,7 +167,7 @@ const onFinish = values => {
         ]}
         hasFeedback
       >
-        <Input.Password  placeholder="请输入您的密码"/>
+        <Input.Password   autoComplete="off"  size="large" placeholder="密码为8-16位数字和字母的组合"/>
       </Form.Item>
 
       <Form.Item
@@ -164,13 +195,13 @@ const onFinish = values => {
           }),
         ]}
       >
-        <Input.Password  placeholder="请确认您的密码"/>
+        <Input.Password   autoComplete="off" size="large"/>
       </Form.Item>
 
       
      
 
-  <Form.Item label="验证码"   extra="We must make sure that your are a human.">
+  <Form.Item label="验证码"  >
         <Row gutter={8}>
           <Col span={12}>
             <Form.Item
@@ -180,16 +211,16 @@ const onFinish = values => {
               rules={[
                 {
                   required: true,
-                  message: 'Please input the captcha you got!',
+                  message: '请输入验证码',
                 },
              
               ]}
             >
-              <Input />
+              <Input   autoComplete="off" size="large" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Button   disabled={disStatus}
+            <Button  style={{width:'100%'}}  disabled={disStatus} size="large"
               onClick={()=>{
               axios.post('http://localhost:8081/getEma',{sendEma:document.getElementById('register_email').value}).then(function(response){
               // var ee=this.sendEma ({getFieldValue})=>{getFieldValue('email')}
@@ -213,25 +244,11 @@ const onFinish = values => {
         </Row>
       </Form.Item>
 
-      <Form.Item
-        name="agreement"
-        valuePropName="checked"
-        rules={[
-          {
-            validator: (_, value) =>
-              value ? Promise.resolve() : Promise.reject('Should accept agreement'),
-          },
-        ]}
-        {...tailFormItemLayout}
-      >
-        <Checkbox>
-          I have read the agreement
-        </Checkbox>
-      </Form.Item>
+     
       <Form.Item {...tailFormItemLayout}>
         <Link to='/Regist'>
-        <Button type="primary" htmlType="submit"  onClick={()=>{
-          axios.post('http://localhost:8081/regist',{account:document.getElementById('register_email').value,passwd:document.getElementById('register_password').value,captcha:document.getElementById('register_captcha').value}).then(function(response){
+        <Button size="large" type="primary" htmlType="submit"  onClick={()=>{
+          axios.post('http://localhost:8081/regist',{account:document.getElementById('register_email').value,user_name:document.getElementById("register_username").value,passwd:document.getElementById('register_password').value,captcha:document.getElementById('register_captcha').value}).then(function(response){
             // console.log(response)
             if(response.data.msg==='username_has_exited'){
               alert('注册失败,用户已存在!')
@@ -240,10 +257,10 @@ const onFinish = values => {
               alert('验证码错误!')
             }
           }).catch(function(err){
-            console.log(err)
+            console.log(err);
           })
         }}>
-          Register
+          注册
         </Button>
         </Link>
       </Form.Item>

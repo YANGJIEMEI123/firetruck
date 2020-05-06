@@ -2,7 +2,7 @@ import React ,{useState,useEffect}from 'react';
 import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import 'antd/dist/antd.css';
-import {Table,Button,Upload,message,Input, Form,Tag,Tooltip } from 'antd';
+import {Table,Button,Upload,message,Input, Form } from 'antd';
 //显示出警状态,记录故障情况
 import reqwest from 'reqwest';
 import Highlighter from 'react-highlight-words';
@@ -55,7 +55,7 @@ class InforUpload extends React.Component {
   onClick=()=>{
     // const _this=this;
     console.log('start');
-    axios.post('http://localhost:8081/updateOutinfor',{upsrc:this.state.upsrc}).then(function (response) {
+    axios.post('http://localhost:8081/updateMember',{upsrc:this.state.upsrc}).then(function (response) {
       alert('导入成功');
       console.log(response)
     }).catch(function(err){
@@ -88,7 +88,9 @@ class InforUpload extends React.Component {
 
 
 
-const CarState =()=> {
+
+
+const Member =()=> {
 
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState([]);
@@ -125,7 +127,7 @@ function setPages(data){
   const fetch = (params = {}) => {
       setLoading(true)
       reqwest({
-        url: 'http://localhost:8081/getUseState',//请求表格数据
+        url: 'http://localhost:8081/getMember',//请求表格数据
         method: 'get',
         data: {//发送到服务器的数据
           results: 10,
@@ -187,7 +189,7 @@ const handleReset = clearFilters => {
           Search
         </Button>
         <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
-          Reset
+          Reset  6089781
         </Button>
       </div>
     ),
@@ -198,8 +200,12 @@ const handleReset = clearFilters => {
         .toLowerCase()
         .includes(value.toLowerCase()),
 
-    render: text =>
-     searchedColumn === dataIndex ? (
+    render: text =>{
+    // console.log(text){}
+   
+     
+    
+    return searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[searchText]}
@@ -208,63 +214,52 @@ const handleReset = clearFilters => {
         />
       ) : (
         text
-      ),
+      )
+  }
   });
 
 
 
+//serial_number,name,age,identify_num,politics_status,contact_way
+
   const columns = [
      
     {
-      title: '出警时间',
-      dataIndex: 'out_time',
-      width: '15%',
-      ...getColumnSearchProps('out_time'),
+      title: "编号",
+      dataIndex: 'serial_number',
+      width: '10%',
+      ...getColumnSearchProps('serial_number'),
     },
     {
-      title: '出警地点',
-      dataIndex: 'out_adress',
-      width: '20%',
+      title: '姓名',
+      dataIndex: 'name',
+      width: '6%',
       editable: true,
-      ...getColumnSearchProps('out_adress'),
+      ...getColumnSearchProps('name'),
       
     },
     {
-      title: '出警车辆',
-      dataIndex: 'license_num',
-      width:"12%"
+      title: '年龄',
+      dataIndex: 'age',
+      width:"3%",
+      // ...getColumnSearchProps('age'),
     },
     {
-      title: '故障情况',
-      dataIndex: 'fault_condition',
-      width:"20%"
+      title: '身份证号',
+      dataIndex: 'identify_num',
+      width:"10%"
     },
     {
-      title: '维修情况',
-      dataIndex: 'repair_status',
-      width: '15%',
-      defaultSortOrder: 'ascend',
-      sorter: (a, b) => a.repair_status - b.repair_status,
-      render:(text,record)=>{
-        const  defaultValue=record.repair_status;
-        if(defaultValue==="0"){
-          return(<div>
-          <Tooltip placement="top" title="点击修改状态为'已维修'">
-          <Tag color="gold">待维修</Tag>
-          </Tooltip>
-            </div>)
-        }
-        else{
-          return(<div>
-           
-            <Tag color="lime">已维修</Tag>
-         
-              </div>)
-        }
-         
-      }
+      title: '政治面貌',
+      dataIndex: 'politics_status',
+      width:"7%"
+    },
+    {
+      title: '联系方式',
+      dataIndex: 'contact_way',
+      width:"10%"
+    },
   
-    },
 
   ];
 
@@ -273,6 +268,7 @@ const handleReset = clearFilters => {
       <div>
         <InforUpload></InforUpload>
       <br></br>
+      
       <Form form={form} >
       <Table
      
@@ -292,5 +288,6 @@ const handleReset = clearFilters => {
 }
 
 
-  export default CarState;
+//   export default CarState;
   
+export default Member;

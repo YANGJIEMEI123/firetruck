@@ -2,7 +2,7 @@ import React ,{useState,useEffect}from 'react';
 import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import 'antd/dist/antd.css';
-import {Table,Button,Upload,message,Input, Form,Tag,Tooltip } from 'antd';
+import {Table,Button,Upload,message,Input, Form,DatePicker,InputNumber } from 'antd';
 //显示出警状态,记录故障情况
 import reqwest from 'reqwest';
 import Highlighter from 'react-highlight-words';
@@ -55,7 +55,7 @@ class InforUpload extends React.Component {
   onClick=()=>{
     // const _this=this;
     console.log('start');
-    axios.post('http://localhost:8081/updateOutinfor',{upsrc:this.state.upsrc}).then(function (response) {
+    axios.post('http://localhost:8081/updateTest',{upsrc:this.state.upsrc}).then(function (response) {
       alert('导入成功');
       console.log(response)
     }).catch(function(err){
@@ -88,7 +88,7 @@ class InforUpload extends React.Component {
 
 
 
-const CarState =()=> {
+const Test =()=> {
 
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState([]);
@@ -96,7 +96,8 @@ const CarState =()=> {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const [loading,setLoading]=useState(false);
- 
+  const [testDate,setTestDate]=useState("");
+  const [testLine,setTestLine]=useState(60);
 
 
 
@@ -125,7 +126,7 @@ function setPages(data){
   const fetch = (params = {}) => {
       setLoading(true)
       reqwest({
-        url: 'http://localhost:8081/getUseState',//请求表格数据
+        url: 'http://localhost:8081/getTest',//请求表格数据
         method: 'get',
         data: {//发送到服务器的数据
           results: 10,
@@ -135,10 +136,11 @@ function setPages(data){
         type: 'json',
       }).then(req => {
         var arr=req.data.table;
-     
+         console.log(arr)
         setPages(arr);
         setLoading(false);
         setDataSource(arr);
+        // console.log(dataSource)
        
       });
     };
@@ -187,7 +189,7 @@ const handleReset = clearFilters => {
           Search
         </Button>
         <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
-          Reset
+          Reset  
         </Button>
       </div>
     ),
@@ -198,8 +200,12 @@ const handleReset = clearFilters => {
         .toLowerCase()
         .includes(value.toLowerCase()),
 
-    render: text =>
-     searchedColumn === dataIndex ? (
+    render: text =>{
+    // console.log(text){}
+   
+     
+    
+    return searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[searchText]}
@@ -208,63 +214,60 @@ const handleReset = clearFilters => {
         />
       ) : (
         text
-      ),
+      )
+  }
   });
 
+
+  function DateChange(date, dateString) {
+    console.log(date, dateString);//dataString是日期
+    setTestDate(dateString);
+  }
+
+  function LineChange(value) {
+    console.log(value);
+    setTestLine(value);
+  }
+
+function publish(){
+  // console.log(testDate);
+  // console.log(testLine);
+  axios.post('http://localhost:8081/getTestLine',{test_time:testDate,test_line:testLine}).then(function(res){
+    console.log(res)
+  }).catch(function(err){
+   console.log(err)
+  })
+}
 
 
   const columns = [
      
     {
-      title: '出警时间',
-      dataIndex: 'out_time',
-      width: '15%',
-      ...getColumnSearchProps('out_time'),
+      title: '测试时间',
+      dataIndex: 'test_time',
+      width: '10%',
+      ...getColumnSearchProps('test_time'),
     },
     {
-      title: '出警地点',
-      dataIndex: 'out_adress',
-      width: '20%',
+      title: '编号',
+      dataIndex: 'serial_number',
+      width: '11%',
       editable: true,
-      ...getColumnSearchProps('out_adress'),
+      ...getColumnSearchProps('serial_number'),
       
     },
     {
-      title: '出警车辆',
-      dataIndex: 'license_num',
-      width:"12%"
+      title: '姓名',
+      dataIndex: 'name',
+      width:"8%",
+      ...getColumnSearchProps('name'),
     },
     {
-      title: '故障情况',
-      dataIndex: 'fault_condition',
-      width:"20%"
+      title: '成绩',
+      dataIndex: 'grade',
+      width:"8%"
     },
-    {
-      title: '维修情况',
-      dataIndex: 'repair_status',
-      width: '15%',
-      defaultSortOrder: 'ascend',
-      sorter: (a, b) => a.repair_status - b.repair_status,
-      render:(text,record)=>{
-        const  defaultValue=record.repair_status;
-        if(defaultValue==="0"){
-          return(<div>
-          <Tooltip placement="top" title="点击修改状态为'已维修'">
-          <Tag color="gold">待维修</Tag>
-          </Tooltip>
-            </div>)
-        }
-        else{
-          return(<div>
-           
-            <Tag color="lime">已维修</Tag>
-         
-              </div>)
-        }
-         
-      }
   
-    },
 
   ];
 
@@ -272,6 +275,13 @@ const handleReset = clearFilters => {
     return (
       <div>
         <InforUpload></InforUpload>
+      <br></br>
+      {/* <div style={{display:"flex",justifyContent:"space-around"}}> */}
+      <b>测试时间: </b><DatePicker  onChange={DateChange} />
+      <b>达标分数:</b><InputNumber  onChange={LineChange}  min={1} max={100} defaultValue={60}></InputNumber>
+      <Button onClick={publish}>
+      发布成绩</Button>
+      {/* </div> */}
       <br></br>
       <Form form={form} >
       <Table
@@ -292,5 +302,6 @@ const handleReset = clearFilters => {
 }
 
 
-  export default CarState;
+//   export default CarState;
   
+export default Test;
