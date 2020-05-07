@@ -361,7 +361,7 @@ const handleReset = clearFilters => {
       dataIndex: 'license_num',
       // sorter: true,
       // render: license_num => `${license_num.first} ${license_num.last}`,
-      width: '15%',
+      width: '3%',
       editable: true,
       // getColumnSearchProps('license_num');
       ...getColumnSearchProps('license_num'),//对这一列设置搜索功能
@@ -378,20 +378,17 @@ const handleReset = clearFilters => {
         { text: '泵浦消防车', value: '泵浦消防车' },
         { text: '通讯指挥消防车', value: '通讯指挥消防车' },
       ],
-      width: '15%',
+      width: '3%',
       editable: true,
       onFilter: (value, record) => record.car_class.indexOf(value) === 0
       ,
     },
-    {
-      title: '车辆设备',
-      dataIndex: 'car_device',
-      editable: true,
-    },
+  
     {
       title: '存续状态',
       dataIndex: 'scrap_state',
       defaultSortOrder: 'ascend',
+      width: '3%',
       sorter: (a, b) => a.scrap_state - b.scrap_state,
       // editable: true,
       render:(text,record)=>{
@@ -423,7 +420,7 @@ const handleReset = clearFilters => {
     {
       title: '操作',
       dataIndex: 'operation',
-      width: '15%',
+      width: '2%',
       render: (text, record) =>{
         const editable=isEditing(record);
         // console.log(editable)

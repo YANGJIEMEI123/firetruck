@@ -18,6 +18,7 @@ render(){
     </Breadcrumb.Item>
    
   </Breadcrumb>
+  <br></br>
   <Content>{this.props.children}</Content>
   </div>)
 }

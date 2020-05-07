@@ -186,7 +186,7 @@ app.post("/login", function (req, res) {
 
 app.get('/getCarInfor',function(req,res){
 
-    let sql='select license_num,car_class,car_device,scrap_state from carinfor where license_num!=""'
+    let sql='select license_num,car_class,scrap_state from carinfor where license_num!=""'
     mydb.query(sql, function (err, results) {
         if(err){
             console.log(err)
@@ -314,19 +314,16 @@ app.post('/scrapCar',(req,res)=>{
 
 
  app.get('/exportExcel1/:id', function(req, res){
-    let sql='select license_num,car_class,car_device,scrap_state from carinfor where license_num!=""'
+    let sql='select license_num,car_class,scrap_state from carinfor where license_num!=""'
     
     mydb.query(sql,function(err,data){//执行数据操作
         if(err){
             //执行出错
         }else{
              console.log(data)
-            // console.log(JSON.parse(JSON.stringify(data)))
+            
             var arr=JSON.parse(JSON.stringify(data))
-            // for(let j=0;j<arr.length;j++){
-            //     arr[j].out_time=arr[j].out_time.substring(0,10);
-            //     // console.log(arr[j].out_time)
-            // }
+            
             console.log(arr)
 
     var conf ={};
@@ -354,7 +351,7 @@ app.post('/scrapCar',(req,res)=>{
   
 ];
 // license_num,car_class,car_device,scrap_state
-var tows = ['license_num','car_class','car_device','scrap_state'];
+var tows = ['license_num','car_class','scrap_state'];
 // console.log(tows[0])
 var jj;
 var datas =[];
@@ -389,10 +386,6 @@ conf.rows=jj;
 
 
 
-
-
-
-
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
@@ -421,7 +414,7 @@ app.post('/updatecarinfor',function(req,res){
     // console.log(newArr);
     var values=newArr;
      //如果数据库中数据已存在,就删除原来的数据替换它,如果不存在则等同于insert into
-            var sql=`replace into carinfor(license_num,car_class,car_device) values?`
+            var sql=`replace into carinfor(license_num,car_class) values?`
             mydb.query(sql,[values],function(err,rows,fields){
                 console.log(rows+'and'+fields)
                 if(err){
@@ -487,6 +480,64 @@ app.post('/updateMember',function(req,res){
             ) 
 })
 
+//批量导入入库信息到数据库
+app.post('/updateInbound',function(req,res){
+    
+    const realsrc=req.body.upsrc;
+    var list = XLSX.parse('.'+realsrc.slice(realsrc.indexOf("/",7)));
+    
+    var arr=list[0].data;
+    var newArr = arr.filter((val, index, arr) => {
+        return index !== 0;
+    })
+    
+    var values=newArr;
+     //如果数据库中数据已存在,就删除原来的数据替换它,如果不存在则等同于insert into
+
+    //  var kk='select i.part_num,i.part_name,i.model_num,sum(i.amount) from inbound as i group by i.part_num'
+
+
+
+            var sql=`replace into inbound(inbound_time,responsible_person,part_num,part_name,model_num,amount,shelf_location) values?`
+            mydb.query(sql,[values],function(err,rows,fields){
+               
+                if(err){
+                    console.log(err);
+                    return;
+                }
+                res.json({msg:'import success'})  
+            }            
+            ) 
+})
+
+//批量导入出库信息到数据库
+
+app.post('/updateOutbound',function(req,res){
+    
+    const realsrc=req.body.upsrc;
+    var list = XLSX.parse('.'+realsrc.slice(realsrc.indexOf("/",7)));
+    
+    var arr=list[0].data;
+    var newArr = arr.filter((val, index, arr) => {
+        return index !== 0;
+    })
+    
+    var values=newArr;
+     //如果数据库中数据已存在,就删除原来的数据替换它,如果不存在则等同于insert into
+            var sql=`replace into outbound(outbound_time,responsible_person,part_num,part_name,model_num,amount) values?`
+            mydb.query(sql,[values],function(err,rows,fields){
+               
+                if(err){
+                    console.log(err);
+                    return;
+                }
+                res.json({msg:'import success'})  
+            }            
+            ) 
+})
+
+
+
 //消防员基本信息渲染表格
 app.get('/getMember',function(req,res){
 
@@ -535,6 +586,87 @@ app.get('/getTest',function(req,res){
        
     })
 })
+
+//入库记录页面渲染
+app.get('/getInbound',function(req,res){
+    let sql='select i.inbound_time,i.responsible_person from inbound as i  group by i.inbound_time';
+    mydb.query(sql,function(err,results){
+    if(err){
+        console.log(err)
+    }
+    var arr=JSON.parse(JSON.stringify(results))
+    console.log(arr)
+    res.send(arr);
+    })
+})
+
+//出库记录页面渲染
+app.get('/getOutbound',function(req,res){
+    let sql='select i.outbound_time,i.responsible_person from outbound as i  group by i.outbound_time';
+    mydb.query(sql,function(err,results){
+    if(err){
+        console.log(err)
+    }
+    var arr=JSON.parse(JSON.stringify(results))
+    console.log(arr)
+    res.send(arr);
+    })
+})
+
+
+
+
+//页面渲染详细入库信息
+app.post('/getDetailInbound',function(req,res){
+    console.log(req.body);
+    let sql='select i.part_num,i.part_name,i.model_num,i.amount,i.shelf_location from inbound as i where i.inbound_time="'+req.body.inbound_time+'" and i.responsible_person="'+req.body.responsible_person+'"';
+    mydb.query(sql,function(err,results){
+        console.log(results)
+        if(err){
+            console.log(err)
+        }
+        
+       else if(results.length>0){
+            // res.send(results)
+            res.json({"code": 0,
+            "msg": "success",
+            "data": {
+              'table':results,
+          
+            }})
+        }else{
+            res.json({msg:'data is not exist'})
+        }
+    })
+})
+
+
+//页面渲染详细出库信息
+
+app.post('/getDetailOutbound',function(req,res){
+    console.log(req.body);
+    let sql='select i.part_num,i.part_name,i.model_num,i.amount from outbound as i where i.outbound_time="'+req.body.outbound_time+'" and i.responsible_person="'+req.body.responsible_person+'"';
+    mydb.query(sql,function(err,results){
+        console.log(results)
+        if(err){
+            console.log(err)
+        }
+        
+       else if(results.length>0){
+            // res.send(results)
+            res.json({"code": 0,
+            "msg": "success",
+            "data": {
+              'table':results,
+          
+            }})
+        }else{
+            res.json({msg:'data is not exist'})
+        }
+    })
+})
+
+
 
 
 
