@@ -24,44 +24,6 @@ render(){
 }
 }
 
-// const routes = [
-//   {
-//     path: '/Index/CarPart/storage',
-//     breadcrumbName: '现有库存',
-//   },
-//   {
-//     path: '/Index/CarPart/inbound',
-//     breadcrumbName: '入库记录'
-//   },
-//   {
-//     path: '/Index/CarPart/outbound',
-//     breadcrumbName: '出库记录',
-//   },
-// ];
-
-// function itemRender(route, params, routes, paths) {
-//   const last = routes.indexOf(route) === routes.length - 1;
-//   return last ? (
-//     <span>{route.breadcrumbName}</span>
-//   ) : (
-//     <Link to={paths.join('/')}>{route.breadcrumbName}</Link>
-//   );
-
- 
-// }
-
-// class MyBread extends React.Component{
-//   render(){
-//     return(
-//     <div>
-//     <Breadcrumb itemRender={itemRender} routes={routes} >
-//     </Breadcrumb>
-//     <div>{this.props.children}</div>
-//     </div>
-   
-//       )
-//   }
-// }
 
 
 export default MyBread;

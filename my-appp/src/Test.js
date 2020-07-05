@@ -280,7 +280,7 @@ function publish(){
       <b>测试时间: </b><DatePicker  onChange={DateChange} />
       <b>达标分数:</b><InputNumber  onChange={LineChange}  min={1} max={100} defaultValue={60}></InputNumber>
       <Button onClick={publish}>
-      发布成绩</Button>
+      督促学习</Button>
       {/* </div> */}
       <br></br>
       <Form form={form} >

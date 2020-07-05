@@ -12,6 +12,8 @@ import Member from './Member';
 import Allstorage from './storage';
 import inbound from "./inbound";
 import outbound from "./outbound";
+import Reset from './Reset';
+import OutDetail from './OutDetial'
 // import PrivateRoute from './private';
 class Routers extends Component {
     render(){
@@ -20,10 +22,14 @@ class Routers extends Component {
                 <Switch>
                 <Route path='/' component={Log}></Route>
                 <Route path='/Regist' component={Regist}></Route>
+                <Route path='/Reset' component={Reset}></Route>
                 <Route path="/Index" component={App}>
                     <IndexRoute component={CarInfor} />
                     <Route path="/Index/CarInfor" component={CarInfor} />
-                    <Route path="/Index/CarState" component={CarState} />
+                    <Route path="/Index/CarState" component={CarState} >
+                  
+                    {/* <Route path="/Index/OutDetail" component={OutDetail} /> */}
+                    </Route>
                     <Route path="/Index/CarPart" component={CarPart} >    
                     <IndexRoute  component={Allstorage} />
                     <Route path="/Index/CarPart/Allstorage" component={Allstorage}/>

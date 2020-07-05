@@ -35,7 +35,7 @@ build/Release
 # Dependency directories
 /node_modules
 /package-lock.json
- 
+/UPLOAD
 # Typescript v1 declaration files
 typings/
  

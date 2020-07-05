@@ -1,0 +1,16 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "8938966",
+      "name": "消防车进站行车路线图",
+      "font_class": "xiaofangchejinzhanhangcheluxiantu",
+      "unicode": "e671",
+      "unicode_decimal": 58993
+    }
+  ]
+}

@@ -89,8 +89,6 @@ class InforUpload extends React.Component {
     const [loading,setLoading]=useState(false);
    
   
-  
-  
    const handleTableChange = (pagination, filters, sorter) => {
       const pager = { ...pagination };
       pager.current = pagination.current;
@@ -127,11 +125,9 @@ class InforUpload extends React.Component {
          
           type: 'json',
         }).then(req => {
-          var arr=req.data.table;
-          console.log(arr)
-          setPages(arr);
+          setPages(req.data.table);
           setLoading(false);
-          setDataSource(arr);
+          setDataSource(req.data.table);
          
         });
       };
@@ -232,13 +228,7 @@ class InforUpload extends React.Component {
         dataIndex: 'amount',
         width:"5%"
       },
-      {
-        title: '货架位置',
-        dataIndex: 'shelf_location',
-        width: '10%',
-        defaultSortOrder: 'ascend',
-    
-      },
+   
   
     ];
   
@@ -303,9 +293,8 @@ class Inbound extends React.Component {
     // };
     getInbound=()=>{
         axios.get('http://localhost:8081/getInbound').then((res)=>{
-            // console.log(res.data)
             this.setState({ 
-                dataSource:res.data 
+                dataSource:res.data.slice(-10)
             });
             console.log(this.state.dataSource);
            }).catch(function(err){
@@ -323,25 +312,16 @@ class Inbound extends React.Component {
     render() {
       let shows=[];
       this.state.dataSource.forEach((element,index)=>{
-     
             shows.push(<Timeline.Item key={index}>
                 {element.inbound_time}<span style={{marginLeft:10}}>负责人:</span><b style={{marginRight:10}}> {element.responsible_person}</b>
                 <a  onClick={()=>
                 {
-                    
-                  
                     var  tt=element.inbound_time;
                     var pp=element.responsible_person;
-                   
                     this.setState({in_time:tt,in_person:pp});
                     this.showDrawer();
-                  
-                   
-                   
                 }} key={index}>入库详情</a>
              </Timeline.Item>)
-          
-          
       })
       return (
         <div>

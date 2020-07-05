@@ -1,0 +1,9 @@
+#resetStep .ant-steps-item-title{
+    color:#fff;
+}
+.ant-form-item-required{
+    color:#fff !important;
+}
+.ant-form-item-label label{
+    color:#fff !important;
+}

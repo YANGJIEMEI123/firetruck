@@ -1,16 +1,11 @@
 const express = require('express');//express是node.js的前端框架
 const mysql = require("mysql");
 const bodyParser = require('body-parser');
-// const formidable=require('formidable');
 var XLSX = require('node-xlsx');
-// var fs=require('fs');
 const app = express();
-// const fs=require('fs');
 const nodemailer=require("nodemailer");
-// var express=require("express");
 const session=require("express-session");
 const nodeExcel = require("excel-export");//首先，引入excel模块：
-
 
 
 app.use(function (req, res, next) {
@@ -27,7 +22,7 @@ app.use(session({
         secret: 'keyboard cat',
         resave: false,
         saveUninitialized: true,
-        cookie: {secure:false,maxAge:1000*60*1},//1分钟有效,
+        cookie: {secure:false,maxAge:1000*60*1440},//24小时有效,
         rolling:true
     }));
 // apikey='1a5251c85a843773d951dac515cf769f';
@@ -42,15 +37,7 @@ let mydb = mysql.createConnection({
 mydb.connect();
 
 
-// app.use(session({
-//         secret: 'keyboard cat',
-//         resave: true,
-//         saveUninitialized: true,
-//         cookie: {secure:false,maxAge:1000*60*10}
-//     }));
- 
-  
-// app.use(require('./Tools/cors').cors);
+
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -64,23 +51,18 @@ app.use(bodyParser.json());
   　　const transporter = nodemailer.createTransport({
   　　　　host: "smtp.qq.com", // qq的邮件地址
   　　　　port: 465, // 端口
-  　　　　secureConnection: false, // use SSL 是否使用安全连接，对https协议的
+  　　　　secureConnection: false, // use SSL 是否使用安全连接
   　　　　auth: {
   　　　　　　"user": '2660397441@qq.com', // 邮箱账号
   　　　　　　"pass": 'ktcffhszprffdiea' // 邮箱的授权码
   　　　　}
   　　});
-  
-  
   app.post("/getEma",function(req,res){ //调用指定的邮箱给用户发送邮件
     console.log('this is'+req.body.sendEma)
     var code='';
     　for(var i=0;i<6;i++){
-  
       　　　　var radom = Math.floor(Math.random()*10);
-      
       　　　　code += radom;
-      
       　　}
               var mailOption={
                   from:"2660397441@qq.com",
@@ -93,24 +75,28 @@ app.use(bodyParser.json());
                           res.send("1");
                           return console.info(error);
                       }else{
-                          req.session.yanzhengma=code;
+
                           req.sessionStore.yanzhengma=code;
                           console.log(req.sessionStore)
-                        //   console.log(req.session.yanzhengma)
-                          // res.send(req.session.yanzhengma)
                           res.send("2");
-          console.log("aa",req.session)
-                          console.info("Message send"+req.session.yanzhengma);
+                          console.info("Message send"+req.sessionStore.yanzhengma);
                       }
                   })
           
           })
 
-
+app.post("/findYzm",function(req,res){
+    if(req.body.yzm===req.sessionStore.yanzhengma){
+        res.json({
+            code:1
+        })
+    }
+    else{
+        res.json({code:0})
+    }
+})
 
 app.post("/regist", function (req, res) {
-    // console.log(req.session)
-    // console.log(req.body.captcha+'and'+req.session.yanzhengma)
     console.log('注册');
     console.log(req.sessionStore.yanzhengma);
     console.log(req.session.yanzhengma)
@@ -126,15 +112,11 @@ app.post("/regist", function (req, res) {
                 msg: "username_has_exited"
             })
         } 
-   
         else {
-
             if(req.body.captcha!==req.sessionStore.yanzhengma){
-
                 res.json({
                     msg:'验证码错误'
                 });
-                // console.log('code',req.session.yanzhengma);
             }else{
                 let newsql = `insert into manager(account,username,passwd) values('${req.body.account}','${req.body.user_name}','${req.body.passwd}')`
                 mydb.query(newsql, function (err, results) {
@@ -153,25 +135,25 @@ app.post("/regist", function (req, res) {
 
 
 app.post("/login", function (req, res) {
-    console.log(req.sessionStore)
+    // console.log(req.sessionStore);
+
     var sql = "select * from manager where account='" + req.body.account + "'";
     mydb.query(sql, function (err, results) {
-        // console.log(results);
-        // console.log(results[0].passwd)
-        console.log(req.body.password)
+    
         console.log(results.passwd ===req.body.password )
         if(results.length<=0){
             res.json({msg:'account is not exist'})
         }
         else{
-            if(req.sessionStore.svg_captcha!==req.body.captcha){
-                res.send("验证码错误");
-            }
-            else if(results[0].passwd!==req.body.password){
+          
+            if(results[0].passwd!==req.body.password){
                 res.send("密码错误");
             }
+            else if(req.sessionStore.svg_captcha!==req.body.captcha){
+                res.send("验证码错误");
+            }
             else{
-               
+                req.sessionStore.userAccount=req.body.account
                 res.json({
                     msg: "login success",
                    
@@ -183,6 +165,82 @@ app.post("/login", function (req, res) {
    
     })
 })
+
+app.get('/user',function (req,res) {  
+let pass=req.sessionStore.userAccount; 
+console.log("pass"+pass);
+// console.log("pass"+req.session.userAccount);
+if(pass){
+    //说明用户身份一直存在的，取库数据，并且返回
+    res.send({
+        msg:"登录信息存在"
+    })
+}else{
+   res.send({
+       msg:"登录信息已过期或不存在"
+   })
+}
+res.end()
+
+})
+
+app.post('/isUser',function(req,res){
+    let sql="select account from manager where account='" + req.body.subEmial + "'";
+    mydb.query(sql,function(err,results){
+        if(err){
+            console.log(err)
+            return
+        }
+        if(results.length<=0){
+            res.json({
+                msg:'not exist'
+            })
+        }else{
+            res.json({
+                data:1
+            })
+        }
+    })
+})
+app.post('/reset',function(req,res){
+    if(req.sessionStore.yanzhengma===req.body.captcha){
+        // res.json({
+        //     data:1
+        // })
+        let sql='update manager set passwd= "'+req.body.pass+'" where account="'+req.body.eml+'"';
+        mydb.query(sql,function(err,results){
+            console.log(results);
+         if(err){
+             console.log(err)
+             return
+         }
+         res.send("1")
+        })
+    }
+    else{
+       res.send("0")
+    }
+   
+})
+app.get('/username',function(req,res){
+    console.log(req.sessionStore.userAccount);
+    let sql="select username from manager where account='"+req.sessionStore.userAccount+"'";
+    mydb.query(sql,function(err,results){
+        console.log(results);
+        if(err){
+            console.log(err)
+        }
+       res.send(results)
+    })
+})
+
+app.get('/deleteuser',function(req,res){
+    req.sessionStore.userAccount="";
+    var username= req.sessionStore.userAccount
+    res.send(username);
+})
+
+
 
 app.get('/getCarInfor',function(req,res){
 
@@ -220,6 +278,20 @@ else{
 })
 })
 
+//删除出警信息
+app.post('/deleteOut',(req,res)=>{
+    let sql='delete from use_state where state_id="'+req.body.state_id+'"'
+    mydb.query(sql,function(err,results){
+    if(err){
+        console.log(err)
+    }
+    else{
+        res.json('delete success')
+    }
+    })
+    })
+
+
 //报废车辆
 
 app.post('/scrapCar',(req,res)=>{
@@ -234,7 +306,23 @@ app.post('/scrapCar',(req,res)=>{
     })
     })
 
+//新增车辆信息
+app.post('/addCar',(req,res)=>{
+    console.log(req.body)
+   let sql= `insert into manager(license_num,car_class) values('${req.body.license_num}','${req.body.car_class}')`
+    mydb.query(sql,function(results,err){
+        if(err){
+            console.log(err)
+            return false
+        }
+        res.json({
+            msg:'success',
+            data:results,
+        })
+    })
+})
 
+//导出车辆使用情况信息
     app.get('/exportExcel/:id', function(req, res){
         let sql='select out_time,out_adress,license_num,fault_condition,repair_status from use_state where out_time!=""'
         
@@ -242,7 +330,7 @@ app.post('/scrapCar',(req,res)=>{
             if(err){
                 //执行出错
             }else{
-                 console.log(data)
+                 console.log(typeof data)
                 // console.log(JSON.parse(JSON.stringify(data)))
                 var arr=JSON.parse(JSON.stringify(data))
                 for(let j=0;j<arr.length;j++){
@@ -253,7 +341,7 @@ app.post('/scrapCar',(req,res)=>{
 
         var conf ={};
         // conf.stylesXmlFile = "styles.xml";
-        var cols =['时间','地点','车辆','故障情况','维修情况']
+        // var cols =['时间','地点','车辆','故障情况','维修情况']
         conf.cols = [{
             caption:'时间',
             type:'string',
@@ -402,12 +490,11 @@ app.use('/UPLOAD', express.static(__dirname + '/UPLOAD'));
 app.use('/getSVG',require('./Controller/getSVG'))
 //批量导入车辆基本信息数据到数据库
 app.post('/updatecarinfor',function(req,res){
-    console.log('yes');
-    // console.log(req.body.upsrc);
     const realsrc=req.body.upsrc;
     var list = XLSX.parse('.'+realsrc.slice(realsrc.indexOf("/",7)));
-    // var len=list[0].data.length;
+    console.log(list[0])
     var arr=list[0].data;
+    console.log(arr)
     var newArr = arr.filter((val, index, arr) => {
         return index !== 0;
     })
@@ -492,23 +579,23 @@ app.post('/updateInbound',function(req,res){
     })
     
     var values=newArr;
-     //如果数据库中数据已存在,就删除原来的数据替换它,如果不存在则等同于insert into
 
-    //  var kk='select i.part_num,i.part_name,i.model_num,sum(i.amount) from inbound as i group by i.part_num'
-
-
-
-            var sql=`replace into inbound(inbound_time,responsible_person,part_num,part_name,model_num,amount,shelf_location) values?`
+            let sql=`insert into inbound(inbound_time,responsible_person,part_num,part_name,model_num,amount) values?`
             mydb.query(sql,[values],function(err,rows,fields){
                
                 if(err){
                     console.log(err);
                     return;
                 }
+                let mysql="insert into stock(part_num,part_name,model_num,amount) values()"
                 res.json({msg:'import success'})  
             }            
             ) 
 })
+
+
+
+　　
 
 //批量导入出库信息到数据库
 
@@ -524,7 +611,7 @@ app.post('/updateOutbound',function(req,res){
     
     var values=newArr;
      //如果数据库中数据已存在,就删除原来的数据替换它,如果不存在则等同于insert into
-            var sql=`replace into outbound(outbound_time,responsible_person,part_num,part_name,model_num,amount) values?`
+            var sql=`replace into outbound(outbound_time,responsible_person,part_num,amount) values?`
             mydb.query(sql,[values],function(err,rows,fields){
                
                 if(err){
@@ -619,7 +706,7 @@ app.get('/getOutbound',function(req,res){
 //页面渲染详细入库信息
 app.post('/getDetailInbound',function(req,res){
     console.log(req.body);
-    let sql='select i.part_num,i.part_name,i.model_num,i.amount,i.shelf_location from inbound as i where i.inbound_time="'+req.body.inbound_time+'" and i.responsible_person="'+req.body.responsible_person+'"';
+    let sql='select i.part_num,i.part_name,i.model_num,i.amount from inbound as i where i.inbound_time="'+req.body.inbound_time+'" and i.responsible_person="'+req.body.responsible_person+'"';
     mydb.query(sql,function(err,results){
         console.log(results)
         if(err){
@@ -645,8 +732,37 @@ app.post('/getDetailInbound',function(req,res){
 
 app.post('/getDetailOutbound',function(req,res){
     console.log(req.body);
-    let sql='select i.part_num,i.part_name,i.model_num,i.amount from outbound as i where i.outbound_time="'+req.body.outbound_time+'" and i.responsible_person="'+req.body.responsible_person+'"';
+    // let sql='select o.part_num,k.part_name,k.model_num,o.amount from outbound as o,(select i.part_name,i.model_num from inbound as i,outbound as j where j.part_num=i.part_num) as k where o.outbound_time="'+req.body.outbound_time+'" and o.responsible_person="'+req.body.responsible_person+'"';
+   let sql='select m.part_num,m.part_name,m.model_num,n.amount from  (select i.part_num,i.part_name,i.model_num,sum(i.amount) as s from inbound as i group by i.part_num) as m ,(select o.part_num,o.amount from outbound as o where o.outbound_time="'+req.body.outbound_time+'" and o.responsible_person="'+req.body.responsible_person+'") as n where m.part_num=n.part_num'
+
     mydb.query(sql,function(err,results){
+        console.log(results)
+        if(err){
+            console.log(err)
+        }
+        
+       else if(results.length>0){
+            // res.send(results)
+            res.json({"code": 0,
+            "msg": "success",
+            "data": {
+              'table':results,
+          
+            }})
+        }else{
+            res.json({msg:'data is not exist'})
+        }
+    })
+})
+
+//页面渲染现有库存信息
+app.get('/getStorage',function(req,res){
+    console.log(req.body);
+    
+   let sql='select m.part_num,m.part_name,m.model_num,(m.s-n.k) as tt from (select i.part_num,i.part_name,i.model_num,sum(i.amount) as s from inbound as i group by i.part_num) as m join (select o.part_num,sum(o.amount) as k from outbound as o group by o.part_num) as n on m.part_num=n.part_num'
+
+    mydb.query(sql,function(err,results){
+
         console.log(results)
         if(err){
             console.log(err)
@@ -668,17 +784,12 @@ app.post('/getDetailOutbound',function(req,res){
 
 
 
-
-
 function formatDate(numb, format="-") {
     let time = new Date((numb - 1) * 24 * 3600000 + 1)
     time.setYear(time.getFullYear() - 70)
     let year = time.getFullYear() + ''
     let month = time.getMonth() + 1 + ''
     let date = time.getDate() + ''
-    // if(format && format.length === 1) {
-    //     return year + format + month + format + date
-    // }
     return year+format+(month < 10 ? '0' + month : month)+format+(date < 10 ? '0' + date : date)
 
 }
@@ -688,22 +799,14 @@ console.log(formatDate(43832,format="-"));
 //导入车辆使用情况信息到数据库
 app.post('/updateOutinfor',function(req,res){
     console.log('yes');
-    // console.log(req.body.upsrc);
     const realsrc=req.body.upsrc;
     var list = XLSX.parse('.'+realsrc.slice(realsrc.indexOf("/",7)));
-    // var len=list[0].data.length;
     var arr=list[0].data;
     var newArr = arr.filter((val, index, arr) => {
         return index !== 0;
     })
  
-   for(let i=0;i<newArr.length;i++){
-       newArr[i][0]=formatDate(newArr[i][0],format="-")
-    // console.log(formatDate(newArr[i][0],format="-"))
-    console.log( newArr[i][0])
-   
 
-   }
    
    console.log(newArr)
     var values=newArr;
@@ -725,7 +828,7 @@ app.post('/updateOutinfor',function(req,res){
 //车辆使用情况页面表格获取
 app.get('/getUseState',function(req,res){
 
-    let sql='select out_time,out_adress,license_num,fault_condition,repair_status from use_state where out_time!=""'
+    let sql='select state_id,out_time,out_adress,license_num,fault_condition,repair_status from use_state where out_time!=""'
     mydb.query(sql, function (err, results) {
         if(err){
             console.log(err)
@@ -761,27 +864,33 @@ app.post('/getTestLine',function(req,res){
             console.log(results);
             var arr=JSON.parse(JSON.stringify(results))
             console.log(arr);
-         for(let i=0;i<arr.length;i++){
-          
 
-              var mailOption={
-                            from:"2660397441@qq.com",
-                            to:arr[i].contact_way,//收件人
-                            subject:"消防知识测试结果通知:",//纯文本
-                            html:"<h1>"+arr[i].name+"同志,您好!您在"+req.body.test_time+"进行的消防知识测试中得到的成绩是"+arr[i].grade+"分,希望您在接下来的日子里认真学习消防知识,争取下次测试有更好的表现!</h1>"
-                        };
-                    transporter.sendMail(mailOption,function(error,info){
+            for(let i=0;i<arr.length;i++){
+                var mailOption={
+                    from:"2660397441@qq.com",
+                    to:arr[i].contact_way,//收件人
+                    subject:"消防知识测试结果通知:",
+                    html:"<h1>"+arr[i].name+"同志,您好!您在"+req.body.test_time+"进行的消防知识测试中得到的成绩是"+arr[i].grade+"分,希望您在接下来的日子里认真学习消防知识,争取下次测试有更好的表现!</h1>"
+                };
+
+
+
+
+                  transporter.sendMail(mailOption,function(error,info){
                                 if(error){
-                    //                 res.send("1");
+                                    res.send("1");
                                     return console.info(error);
                                 }else{
-                    //                
+                                  
+                                    res.send("2");
+                                   
                                 }
                             })
-
-         }
-
-
+                    }
+                    
+            
+               
+     
         }
        
        

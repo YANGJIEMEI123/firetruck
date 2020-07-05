@@ -22,9 +22,6 @@ router.post('/',function(req,res){
     var captcha = svgCaptcha.create(codeConfig);
     req.sessionStore.svg_captcha = captcha.text.toLowerCase(); //存session用于验证接口获取文字码
     console.log(req.sessionStore);
-    // var codeData = {
-    //     img:captcha.data
-    // }
     res.type('svg')
     res.send(captcha.data);
 

@@ -1,5 +1,6 @@
-/* svg{
-    width:100%;
-    position:relative;
-    top:-7px;
-} */
+#logCard .ant-card-head-title{
+ font-size: 30px;
+ font-family: '华文行楷';
+ /* font-weight:bold; */
+ color:#f1eeee;
+}

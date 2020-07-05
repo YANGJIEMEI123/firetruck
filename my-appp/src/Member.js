@@ -3,7 +3,6 @@ import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import 'antd/dist/antd.css';
 import {Table,Button,Upload,message,Input, Form } from 'antd';
-//显示出警状态,记录故障情况
 import reqwest from 'reqwest';
 import Highlighter from 'react-highlight-words';
 import { SearchOutlined } from '@ant-design/icons';

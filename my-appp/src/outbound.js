@@ -295,15 +295,13 @@ class Outbound extends React.Component {
         axios.get('http://localhost:8081/getOutbound').then((res)=>{
             // console.log(res.data)
             this.setState({ 
-                dataSource:res.data 
+                dataSource:res.data.slice(-10) 
             });
             console.log(this.state.dataSource);
            }).catch(function(err){
             console.log(err);
            })
     }
-
-
 
     componentWillMount(){
      this.getOutbound();
@@ -313,7 +311,6 @@ class Outbound extends React.Component {
     render() {
       let shows=[];
       this.state.dataSource.forEach((element,index)=>{
-     
             shows.push(<Timeline.Item key={index}>
                 {element.outbound_time}<span style={{marginLeft:10}}>负责人:</span><b style={{marginRight:10}}> {element.responsible_person}</b>
                 <a  onClick={()=>
@@ -339,7 +336,8 @@ class Outbound extends React.Component {
             {/* <Button type="primary" size="small" style={{ marginBottom: 16 }} onClick={this.handleClick}>
            倒序
           </Button  > */}
-          <Card title="出库信息"   style={{width:550}}>
+           {/* style={{width:550}} */}
+          <Card title="出库信息"  >
           <Timeline  reverse='false'>
            {shows}
             {/* <Timeline.Item>Solve initial network problems 2015-09-01</Timeline.Item>

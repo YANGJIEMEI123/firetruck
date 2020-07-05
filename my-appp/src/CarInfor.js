@@ -8,24 +8,14 @@ import Highlighter from 'react-highlight-words';
 import { SearchOutlined} from '@ant-design/icons';
 // var btnexist=false;
 const { Option } = Select;
-// updatecarinfor
-// const options = [
-//   {
-//     value: '水罐消防车',
-//     label: '水罐消防车',
-   
-//   },
-//   {
-//     value: 'jiangsu',
-//     label: 'Jiangsu',
-//   },
-// ];
+
 class InforUpload extends React.Component {
   constructor(){
     super();
     this.state={
      upsrc:'',
      dis:true,
+     car_class:'',
      props:{
       name: 'file',
       action: 'http://localhost:8081/inforUpload',
@@ -34,13 +24,10 @@ class InforUpload extends React.Component {
       },
       // onClick:this.onClick,
       onChange(info){
-
         if (info.file.status !== 'uploading') {
           console.log(info.fileList);
-        
         }
         if (info.file.status !== 'removed') {
-         
         }
         if (info.file.status === 'done') {
           this.setState({
@@ -52,7 +39,6 @@ class InforUpload extends React.Component {
           console.log(info.fileList[0].response.data.src);
           message.success(`${info.file.name}上传成功 `);
       
-          
         } else if (info.file.status === 'error') {
           message.error(`${info.file.name} 上传失败.`);
         }
@@ -75,8 +61,19 @@ class InforUpload extends React.Component {
     })
 
   }
+
+
+  getValue=(event)=>{
+    //获取被选中的值
+    console.log(event.target.value);
+    this.setState({
+      //默认值改变
+      car_class:event.target.value
+    })
+  }
+
   render(){
-    return(<div style={{height:80,display:"flex",flexDirection:"column",justifyContent:"space-between"}}>
+    return(<div style={{display:"flex",justifyContent:"space-between"}}>
       <div style={{display:"flex"}}>
     <Upload  {...this.state.props} style={{marginBottom:"10px;"}}>
       <Button >
@@ -85,29 +82,38 @@ class InforUpload extends React.Component {
     </Upload>
     <Button style={{marginRight:20,marginLeft:20}} type="primary" disabled={this.state.dis} htmlType="submit" onClick={this.onClick} >导入</Button>
     <Button style={{marginRight:20}}  type="primary"  id="exportExcel1" onClick={()=>{
-
-    console.info("exportExcel1");
-    var url =  "http://localhost:8081/exportExcel1/" + 1;
-    console.info(url);
+    var url =  "http://localhost:8081/exportExcel1/" +1;
     window.location = url;
     }} >导出</Button>
     </div>
     <div style={{display:"flex"}}>
   
    
-    <Input.Group compact>
-      <Input style={{ width: '15%' }} placeholder="车牌号"/>
-      <Select defaultValue="水罐消防车">
+    {/* <Input.Group compact>
+      <Input id="getNum" style={{ width: '35%' }} placeholder="车牌号"/>
+      <Select id="getClass" defaultValue="水罐消防车" onChange={(e)=>this.getValue(e)} >
         <Option value="水罐消防车">水罐消防车</Option>
         <Option value="泡沫消防车"> 泡沫消防车</Option>
+        <Option value="二氧化碳消防车">水罐消防车</Option>
+        <Option value="云梯消防车"> 泡沫消防车</Option>
+        <Option value="通讯指挥消防车">水罐消防车</Option>
+        <Option value="泵浦消防车">水罐消防车</Option>
       </Select>
-      <Input style={{ width: '20%' }} placeholder="车辆设备" />
-      {/* <Input style={{ width: '30%' }}  /> */}
-      {/* <Input style={{ width: '30%' }}  /> */}
-      <Button type="primary" >
+   
+      <Button type="primary" onClick={()=>{
+      
+        axios.post("http://localhost:8081/addCar",
+        {license_num:document.getElementById('getNum').value,car_class:this.state.car_class}).catch(function(res){
+        if(res.msg==='success'){
+          message.success('添加成功!')
+        }
+        }).catch(function(err){
+
+        })
+      }}>
       新增
     </Button>
-    </Input.Group>
+    </Input.Group> */}
     
     </div>
 
@@ -118,7 +124,7 @@ class InforUpload extends React.Component {
 }
 
 
-// const text = '确定导入表格';
+
 
 
 const EditableCell = ({
@@ -168,11 +174,8 @@ const CarInfor =()=> {
   const [pagination,setPagination]=useState({});
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
-  // const [searchInput,setSearchInput]=useState('')
   const [loading,setLoading]=useState(false);
-  // const [updt,setUpdt]=useState(0)
-  // const fileInput = useRef(null);
-  // const [ref, setRef] = useState(null);
+
 
  
 
@@ -195,7 +198,6 @@ const CarInfor =()=> {
 function setPages(data){
   const page = { ...pagination };
   page.total =data.length;
-  // page.defaultPageSize=6;
   setPagination(page)
 }
 
@@ -213,16 +215,13 @@ const fetch = (params = {}) => {
    
     type: 'json',
   }).then(req => {
-    // const paginations = { ...pagination };
-    // paginations.total = req.data.table.length;
     setPages(req.data.table);
     setLoading(false);
     setDataSource(req.data.table);
-    // setPagination(paginations);
    
   });
 };
-  // fetch();
+
   useEffect(()=>{
  
       fetch();
@@ -302,10 +301,6 @@ const handleReset = clearFilters => {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
         <Input
-        // ref={(el) => setRef(el)}
-          // ref={node => {
-          //  {fileInput}=node
-          // }}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
           onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
@@ -319,10 +314,10 @@ const handleReset = clearFilters => {
           size="small"
           style={{ width: 90, marginRight: 8 }}
         >
-          Search
+          搜索
         </Button>
         <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
-          Reset
+          重置
         </Button>
       </div>
     ),
@@ -332,11 +327,6 @@ const handleReset = clearFilters => {
         .toString()
         .toLowerCase()
         .includes(value.toLowerCase()),
-    // onFilterDropdownVisibleChange: visible => {//自定义筛选菜单可见变化时调用
-    //   if (visible) {
-    //     setTimeout(() => ref.select());
-    //   }
-    // },
     render: text =>
      searchedColumn === dataIndex ? (
         <Highlighter
@@ -373,7 +363,6 @@ const handleReset = clearFilters => {
         { text: '水罐消防车', value: '水罐消防车' },
         { text: '泡沫消防车', value: '泡沫消防车' },
         { text: '二氧化碳消防车', value: '二氧化碳消防车' },
-        // { text: '泡沫消防车', value: '泡沫消防车' },
         { text: '云梯消防车', value: '云梯消防车' },
         { text: '泵浦消防车', value: '泵浦消防车' },
         { text: '通讯指挥消防车', value: '通讯指挥消防车' },
@@ -396,16 +385,23 @@ const handleReset = clearFilters => {
         // console.log(record.scrap_state)
        if(myDefault===0){
         return(<div>
+          <Popconfirm title="确定报废这辆消防车" onConfirm={() =>{
+          axios.post('http://localhost:8081/scrapCar', {
+            license: record.license_num
+              }).then(function (res) {
+                       console.log(res)
+                       record.scrap_state = 1;
+                       fetch();
+                          }).catch(function (err) {
+                          console.log(err)
+                 })
+              }
+             }
+          >
            <Tooltip placement="top" title="点击报废消防车辆">
-          <Tag color="cyan" onClick={()=>{
-        axios.post('http://localhost:8081/scrapCar',{license:record.license_num}).then(function(res){
-          console.log(res)
-          record.scrap_state=1
-        }).catch(function(err){
-          console.log(err)
-        })
-      }}  >可使用</Tag>
+          <Tag color="cyan" >可使用</Tag>
           </Tooltip>
+          </Popconfirm>
           </div>)
        }
        else{
@@ -438,12 +434,13 @@ const handleReset = clearFilters => {
               return handleDelete(record.license_num)}
           
             }>
-              <a href="/#" style={{
+              <a href="javascript:void(0);" style={{
                 marginRight: 8,
               }}>删除</a>
             </Popconfirm>
-            <a href="/#"
-              onClick={() => save(record.key)}
+            <a href="javascript:void(0);"
+              onClick={() => save(record.license_num)
+              }
               style={{
                 marginRight: 8,
               }}
@@ -451,7 +448,7 @@ const handleReset = clearFilters => {
               保存
             </a>
             <Popconfirm title="确定取消保存?" onConfirm={cancel}>
-              <a href="/#">取消</a>
+              <a href="javascript:void(0);">取消</a>
             </Popconfirm>
           </span>
            
@@ -472,7 +469,7 @@ const handleReset = clearFilters => {
                 marginRight: 8,
               }}>删除</a>
             </Popconfirm>
-            <a  href="/#" disabled={editingKey !== ''} onClick={() => edit(record)}>
+            <a  href="javascript:void(0);" disabled={editingKey !== ''} onClick={() => edit(record)}>
               编辑
             </a>
             </span>
@@ -516,9 +513,11 @@ const handleReset = clearFilters => {
 
     return (
       <div>
+       
         <InforUpload></InforUpload>
+      <Form  form={form} component={false}> 
+    
       <br></br>
-      <Form form={form} component={false}>
       <Table
       components={components}
       rowClassName={() => 'editable-row'}
@@ -530,7 +529,7 @@ const handleReset = clearFilters => {
         loading={loading}
         onChange={handleTableChange}
       />
-      </Form>
+     </Form>
        </div>
     );
       

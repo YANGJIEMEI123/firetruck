@@ -5,7 +5,7 @@ import Routers from './Route';
 
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
-
+import './img/iconfont.css'
 // import AppRoute from './AppRoute';
 import * as serviceWorker from './serviceWorker';
 

@@ -2,11 +2,37 @@ import React ,{useState,useEffect}from 'react';
 import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import 'antd/dist/antd.css';
-import {Table,Button,Upload,message,Input, Form,Tag,Tooltip } from 'antd';
-//显示出警状态,记录故障情况
+import {Table,Button,Upload,message,Input,Popconfirm,InputNumber, Form,Tag,Tooltip } from 'antd';
 import reqwest from 'reqwest';
 import Highlighter from 'react-highlight-words';
 import { SearchOutlined } from '@ant-design/icons';
+// import {Link} from 'react-router';
+// import GetMap from './getMap'
+
+// const NowState=()=>{
+//   return( 
+//   <Row gutter={16}>
+//     {/* <Row gutter={16}> */}
+//       <Col span={5} >
+//         <Row gutter={4} > <div style={{width:"100%",display:"flex",justifyContent:'center'}}><span style={{color:'red'}} class="iconfont icon-xiaofangchejinzhanhangcheluxiantu"></span></div></Row>
+//         <Row gutter={5}><div style={{width:"100%",textAlign:'center',fontSize:15}}> 出警情况</div></Row>
+//       </Col>
+//       <Col span={8}>
+//     <Link to='/Index/OutDetail'>
+//         <a  title="查看详情">
+//      <Statistic style={{textAlign:'center'}}  title="出警车辆" value={6} />
+//      </a>
+//      </Link>
+//      </Col>
+//      <Col span={8}>
+//      <a title="查看详情">
+//      <Statistic style={{textAlign:'center'}}  title="在队车辆" value={12}  />
+//      </a>
+//  </Col>
+//   </Row>
+//   )
+// }
+
 
 class InforUpload extends React.Component {
   constructor(){
@@ -86,6 +112,40 @@ class InforUpload extends React.Component {
 
 
 
+const EditableCell = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  record,
+  index,
+  children,
+  ...restProps
+}) => {
+  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+  return (
+    <td {...restProps}>
+      {editing ? (
+        <Form.Item
+          name={dataIndex}
+          style={{
+            margin: 0,
+          }}
+          rules={[
+            {
+              required: true,
+              message: `Please Input ${title}!`,
+            },
+          ]}
+        >
+          {inputNode}
+        </Form.Item>
+      ) : (
+        children
+      )}
+    </td>
+  );
+};
 
 
 const CarState =()=> {
@@ -96,6 +156,7 @@ const CarState =()=> {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const [loading,setLoading]=useState(false);
+  const [editingKey, setEditingKey] = useState('');
  
 
 
@@ -115,10 +176,16 @@ const CarState =()=> {
   };
 
 function setPages(data){
+  console.log(data);
   const page = { ...pagination };
   page.total =data.length;
   setPagination(page)
 }
+
+// const maps = groupBy(arr, ({relation, fraudStrtus}) => {
+//   relation + fraudStrtus
+// })
+
 
   // fetch();
   useEffect(()=>{
@@ -134,12 +201,11 @@ function setPages(data){
        
         type: 'json',
       }).then(req => {
-        var arr=req.data.table;
-     
-        setPages(arr);
+        setPages(req.data.table);
         setLoading(false);
-        setDataSource(arr);
-       
+        setDataSource(req.data.table);
+        // var arr=req.data.table;
+        
       });
     };
 
@@ -148,6 +214,49 @@ function setPages(data){
   },[])
 
 
+//可编辑
+const isEditing = record => record.state_id === editingKey;
+const edit = record => {
+   console.log(record)
+  
+  form.setFieldsValue({ ...record });
+  setEditingKey(record.state_id);
+ 
+};
+
+const cancel = () => {
+  setEditingKey('');
+};
+
+
+ 
+  const handleDelete = key => {
+    setDataSource(dataSource.filter(item => item.state_id !== key))
+    setPagination({total:()=>this.total-1})
+  };
+
+
+  const save = async key => {
+    try {
+      const row = await form.validateFields();
+      const newData = [...dataSource];
+      const index = newData.findIndex(item => key === item.state_id);
+
+      if (index > -1) {
+        const item = newData[index];
+        newData.splice(index, 1, { ...item, ...row });
+        setDataSource(newData);
+        setEditingKey('');
+     
+      } else {
+        newData.push(row);
+        setDataSource(newData);
+        setEditingKey('');
+      }
+    } catch (errInfo) {
+      console.log('Validate Failed:', errInfo);
+    }
+  };
 
 
 //搜索功能
@@ -211,22 +320,30 @@ const handleReset = clearFilters => {
       ),
   });
 
+// const sameTime=()=>{
 
+// }
 
   const columns = [
+    {
+      title:'序号',
+      dataIndex:'state_id',
+      width:'3%'
+    },
      
     {
       title: '出警时间',
       dataIndex: 'out_time',
-      width: '15%',
+      width: '12%',
       ...getColumnSearchProps('out_time'),
     },
     {
       title: '出警地点',
       dataIndex: 'out_adress',
-      width: '20%',
+      width: '15%',
       editable: true,
       ...getColumnSearchProps('out_adress'),
+      editable: true,
       
     },
     {
@@ -237,17 +354,18 @@ const handleReset = clearFilters => {
     {
       title: '故障情况',
       dataIndex: 'fault_condition',
-      width:"20%"
+      width:"15%",
+      editable: true,
     },
     {
       title: '维修情况',
       dataIndex: 'repair_status',
-      width: '15%',
+      width: '8%',
       defaultSortOrder: 'ascend',
       sorter: (a, b) => a.repair_status - b.repair_status,
       render:(text,record)=>{
         const  defaultValue=record.repair_status;
-        if(defaultValue==="0"){
+        if(defaultValue===0){
           return(<div>
           <Tooltip placement="top" title="点击修改状态为'已维修'">
           <Tag color="gold">待维修</Tag>
@@ -265,21 +383,98 @@ const handleReset = clearFilters => {
       }
   
     },
+    {
+      title: '操作',
+      dataIndex: 'operation',
+      width: '10%',
+      render: (text, record) =>{
+        const editable=isEditing(record);
+        // console.log(editable)
+        // this.state.dataSource.length >= 1
+        if(dataSource.length >= 1){
+          return  editable ? (
+            <span>
+               <Popconfirm title="确定删除出警信息?" onConfirm={() =>{ 
+              axios.post('http://localhost:8081/deleteOut',{state_id:record.state_id}).then(function(results){
+              console.log(results)
+              if(results.data==="delete success"){
+                message.success("删除成功!")
+              }
+              }).catch(function(err){
+                console.log(err)
+              })
+              console.log(record) ;
+              return handleDelete(record.state_id)}
+          
+            }>
+              <a href="javascript:void(0);" style={{
+                marginRight: 8,
+              }}>删除</a>
+            </Popconfirm>
+            <a href="javascript:void(0);"
+              onClick={() => save(record.state_id)
+              }
+              style={{
+                marginRight: 8,
+              }}
+            >
+              保存
+            </a>
+            <Popconfirm title="确定取消保存?" onConfirm={cancel}>
+              <a href="javascript:void(0);">取消</a>
+            </Popconfirm>
+          </span>
+           
+
+          ) : (
+            <span>
+            <Popconfirm title="确定删除出警信息?" onConfirm={() =>{ 
+              axios.post('http://localhost:8081/deleteOut',{state_id:record.state_id}).then(function(results){
+              console.log(results)
+              }).catch(function(err){
+                console.log(err)
+              })
+              console.log(record) ;
+              return handleDelete(record.state_id)}
+          
+            }>
+              <a href="/#" style={{
+                marginRight: 8,
+              }}>删除</a>
+            </Popconfirm>
+            <a  href="javascript:void(0);" disabled={editingKey !== ''} onClick={() => edit(record)}>
+              编辑
+            </a>
+            </span>
+          );
+        }
+        else{
+          return null
+        }
+   
+      }
+    
+   
+    },
+  
 
   ];
 
   
     return (
       <div>
+        {/* <div style={{width:500,border:"1px #ccc solid",padding:20}}> <NowState ></NowState></div> */}
+       {/* <br></br> */}
         <InforUpload></InforUpload>
       <br></br>
+    {/* <GetMap></GetMap> */}
       <Form form={form} >
       <Table
      
       rowClassName={() => 'editable-row'}
       bordered
         columns={columns}
-        rowKey={record => record.license_num}
+        rowKey={record => record.state_id}
         dataSource={dataSource}
         pagination={pagination}
         loading={loading}

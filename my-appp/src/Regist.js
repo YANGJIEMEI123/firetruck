@@ -1,9 +1,10 @@
 import React,{ useState, useEffect } from 'react';//c
-import {Link} from 'react-router';
+// import {Link} from 'react-router';
 import axios from 'axios';
 import 'antd/dist/antd.css';
-import{Form,Input,Row,Col,Button} from 'antd';
-
+import './Regist.css';
+import{Form,Input,Row,Col,Button,Card,message} from 'antd';
+import  Background from './img/bg.jpg';
 // axios.defaults.withCredentials=true;
 // axios.defaults.baseURL="http://localhost:8081/"
 const formItemLayout = {
@@ -12,7 +13,7 @@ const formItemLayout = {
       span: 24,
     },
     sm: {
-      span: 8,
+      span: 5,
     },
   },
   wrapperCol: {
@@ -43,11 +44,27 @@ const tailFormItemLayout = {
 
 const RegistrationForm = () => {
   const [form] = Form.useForm();
+  const [, forceUpdate] = useState();
   // const [count,setCount]=useState(60);
   const [yzm,setYzm]=useState('获取验证码');
-  useEffect(()=>{
+
+  useEffect(() => {
+    forceUpdate({});
+  }, []);
+ 
+  const success = (ms) => {
+    message.success(ms);
+  };
   
-  })
+  const error = (ms) => {
+    message.error(ms);
+  };
+  
+  const warning = (ms) => {
+    message.warning(ms);
+  };
+
+
   const [disStatus,setdisStatus]=useState(false);
   var flag=false
 var changeDisStatus=()=>{
@@ -56,8 +73,6 @@ var changeDisStatus=()=>{
 }
   var setTime=()=>{
     let countdown = 60;
-    // @ts-ignore
-  
     const timer = setInterval(() => {
         if (countdown <= 0) {
             clearInterval(timer);
@@ -65,30 +80,38 @@ var changeDisStatus=()=>{
            setYzm('重新获取');
          
         } else {
-          // changeDisStatus();
           setYzm(`${countdown}s后重新获取`);
             countdown--;
         }
-        // editCookie('secondsremained', countdown, countdown + 1);
     }, 1000);
   }
 
-  // const [yzmNum,setYzmNum]=useState('');
-
-
-
+  var sectionStyle = {
+    width: "100%",
+    height: "650px",
+    backgroundImage: `url(${Background})` ,
+    backgroundRepeat:'no-repeat',
+    backgroundSize:"cover",
+    backgroundPosition:'center center',
+    backgroundAttachment: 'fixed',
+  };
+  var coverStyle={
+    width:'100%',
+    height:'100%',
+    background:'#00000090',
   
-const onFinish = values => {
-  console.log('Received values of form: ', values);
-};
+  }
   return (
-    <div style={{maxWidth:'500px',height:'500px',margin:'auto',position:'absolute',top:'0',right:'0',bottom:'0',left:'0'}}>
+    <div style={sectionStyle}>
+    <div style={coverStyle}>
+    <div style={{maxWidth:'600px',height:'492px',border:"1px solid #cccccc30",margin:'auto',position:'absolute',top:'0',right:'0',bottom:'0',left:'0',display:"flex",flexDirection:'column',alignContent:'center'}}>
+   <Card id="regCard" title="消防车辆保养管理系统"  style={{backgroundColor:'#f0f5ff50',borderColor:'#87e8de'}} >
     <Form
       {...formItemLayout}
       form={form}
       name="register"
-      onFinish={onFinish}
-    
+      // onFinish={onFinish}
+     
       scrollToFirstError
     >
 
@@ -134,7 +157,7 @@ const onFinish = values => {
         
           {
             required: true,
-            message: '账号不能为空',
+            message: '用户名不能为空',
           }
         
         ]}
@@ -179,7 +202,7 @@ const onFinish = values => {
         rules={[
           {
             required: true,
-            message: '请确认您的密码',
+            message: '密码不能为空',
           },
           ({ getFieldValue }) => ({
             validator(rule, value) {
@@ -207,7 +230,7 @@ const onFinish = values => {
             <Form.Item
               name="captcha"
               htmlFor='captcha'
-              noStyle
+              // noStyle
               rules={[
                 {
                   required: true,
@@ -222,19 +245,19 @@ const onFinish = values => {
           <Col span={12}>
             <Button  style={{width:'100%'}}  disabled={disStatus} size="large"
               onClick={()=>{
+                if(document.getElementById('register_email').value===""){
+                 warning("请先输入邮箱!")
+                  return
+                }
               axios.post('http://localhost:8081/getEma',{sendEma:document.getElementById('register_email').value}).then(function(response){
-              // var ee=this.sendEma ({getFieldValue})=>{getFieldValue('email')}
               console.log(response)
               if(response.data===1){
-                alert('发送失败');
+                error('验证码发送失败!');
               }else if(response.data===2){
-                alert('发送成功')
-              
+                success('验证码发送成功!')
                 changeDisStatus();
                 setTime();
               }
-             
-                  console.log(response)
               }).catch(function(err){
                 console.log(err);
               })
@@ -246,25 +269,42 @@ const onFinish = values => {
 
      
       <Form.Item {...tailFormItemLayout}>
-        <Link to='/Regist'>
-        <Button size="large" type="primary" htmlType="submit"  onClick={()=>{
+        {/* <Link to='/Regist'> */}
+        <Button  type="primary" htmlType="submit"  
+
+// disabled={
+//   !form.isFieldsTouched(true) ||
+//   form.getFieldsError().filter(({ errors }) => errors.length).length
+// }
+        onClick={()=>{
+      //   if(getFieldValue('email')){alert('buneng')
+      //   return
+      // }
+          
           axios.post('http://localhost:8081/regist',{account:document.getElementById('register_email').value,user_name:document.getElementById("register_username").value,passwd:document.getElementById('register_password').value,captcha:document.getElementById('register_captcha').value}).then(function(response){
-            // console.log(response)
             if(response.data.msg==='username_has_exited'){
-              alert('注册失败,用户已存在!')
+              warning('注册失败,用户已存在!')
+              return
             }
              if(response.data.msg==='验证码错误'){
-              alert('验证码错误!')
+              error('验证码错误!')
+              return
             }
+            success('注册成功!')
+            window.location.href="/"
           }).catch(function(err){
             console.log(err);
           })
-        }}>
+        }}
+        >
           注册
         </Button>
-        </Link>
+        {/* </Link> */}
       </Form.Item>
     </Form>
+    </Card>
+    </div>
+    </div>
     </div>
   );
 };
